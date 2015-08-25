@@ -8,4 +8,8 @@
     This is from nodebb-plugin-plinker
 </div>
 
+<div>
+    Some data: {jgdata}
+</div>
+
 </div>

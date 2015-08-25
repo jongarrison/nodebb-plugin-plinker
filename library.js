@@ -25,8 +25,9 @@
 				winston.info("About to register route for rendered page");
 
 				var render = function(req, res) {
-					var templatePath = './static/js/test.tpl';
+					var templatePath = 'nodebb-plugin-plinker/test';
 					winston.info("About to render template: " + templatePath)
+
 					res.render(templatePath, {
 						url: nconf.get('url'),
 						jgdata: "Some data rendered into things"
