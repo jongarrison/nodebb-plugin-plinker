@@ -1,0 +1,22 @@
+{
+	"id": "nodebb-plugin-plinker",
+	"name": "NodeBB Plinker Plugin",
+	"description": "A simple NodeBB plugin for testing things out",
+	"url": "https://github.com/jongarrison/nodebb-plugin-plinker",
+	"library": "./library.js",
+	"hooks": [
+      { "hook": "static:app.load", "method": "init" }
+    ],
+	"staticDirs": {
+        "static": "./static"
+    },
+    "less": [
+        "static/style.less"
+    ],
+    "scripts": [
+        "static/js/plinker.js"
+	  ],
+    "templates": "./templates"
+
+}
+

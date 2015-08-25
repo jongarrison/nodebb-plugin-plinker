@@ -1,0 +1,26 @@
+{
+  "name": "nodebb-plugin-plinker",
+  "version": "0.1.0",
+  "description": "A versatile NodeBB Plugin",
+  "nbbpm": {
+    "compatibility": "^0.6.0"
+  },
+  "main": "library.js",
+  "scripts": {
+    "test": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jongarrison/nodebb-plugin-plinker.git"
+  },
+  "keywords": [
+    "nodebb",
+    "plugin"
+  ],
+  "author": "Jon Garrison",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jongarrison/nodebb-plugin-plinker/issues"
+  },
+  "homepage": "https://github.com/jongarrison/nodebb-plugin-plinker#readme"
+}
