@@ -5,7 +5,7 @@
 	"url": "https://github.com/jongarrison/nodebb-plugin-plinker",
 	"library": "./library.js",
 	"hooks": [
-      { "hook": "static:app.load", "method": "init" }
+      { "hook": "static:app.load", "method": "staticAppLoad" }
     ],
 	"staticDirs": {
         "static": "./static"
