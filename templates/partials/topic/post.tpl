@@ -1,8 +1,3 @@
-<div>
-
-<h1>This is a custom Post Template</h1>
-
-</div>
 
 <div class="clearfix">
 	<div class="icon pull-left">

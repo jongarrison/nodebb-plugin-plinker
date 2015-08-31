@@ -5,17 +5,32 @@
 		async = module.parent.require('async'),
 		nconf = module.parent.require('nconf'),
 		Meta = module.parent.require('./meta'),
+		path = require('path'),
 		User = module.parent.require('./user'),
 		Posts = module.parent.require('./posts'),
 		Topics = module.parent.require('./topics'),
 		Privileges = module.parent.require('./privileges'),
-		SocketPosts = module.parent.require('./socket.io/posts');
+		SocketPosts = module.parent.require('./socket.io/posts'),
+		templates = module.parent.require('templates.js'),
+		app, router,
+		fs = require('fs'),
+		cachedWidgetTemplates = {};
 
 			//Stuff for topic rendering
 			//app = express(),
 			//controllers = module.parent.require('./controllers'),//possible double dot ../controllers
 			//middleware = module.parent.require('./middleware'),
 
+		function loadWidgetTemplate(template, next) {
+			var __dirname = "./node_modules/nodebb-plugin-plinker";
+			fs.readFile(path.resolve(__dirname, template), function (err, data) {
+				if (err) {
+					console.log(err.message);
+					return next(null, err);
+				}
+				next(data.toString());
+			});
+		}
 
 		var	Plinker = {
 			config: function() {
@@ -23,11 +38,11 @@
 			},
 
 			staticAppLoad: function(params, callback) {
-				var app = params.app,
-						router = params.router,
-						middleware = params.middleware,
+				var middleware = params.middleware,
 						controllers = params.controllers;
 
+				router = params.router;
+				app = params.app;
 
 				// Load saved config
 				winston.info("PLINKER - app.load called");
@@ -47,10 +62,29 @@
 
 				var helpers = module.parent.require('./routes/helpers');
 				var setupPageRoute = helpers.setupPageRoute;
-				//winston.info("controllers is: " + JSON.stringify(controllers));
 				var topicController = controllers.topics;
-				//winston.info("topicController is: " + JSON.stringify(topicController));
-				setupPageRoute(router, '/plugin-topic/:topic_id/:slug?', middleware, [], topicController.get);
+				//setupPageRoute(router, '/plugin-topic/:topic_id/:slug?', middleware, [], topicController.get);
+
+				var interceptTopicGet = function(req, res, reqNext) {
+					var pluginTopicId = 10
+					req.params.topic_id = pluginTopicId;
+
+					async.waterfall([
+						function(next) {
+							Topics.getTopicData([pluginTopicId], next);
+						},
+						function(topic, next) {
+							req.params.slug = topic.slug.replace(/\d+\//g, "");
+							winston.info("Intercepted topic request. topic id: " + req.params.topic_id + " (slug from db): " + req.params.slug);
+							topicController.get(req, res, reqNext);
+						}
+					]);
+				}
+
+				var customTopicRoute = '/plugin-topic'; //'/plugin-topic/:topic_id/:slug?';
+				router.get(customTopicRoute, middleware.buildHeader, [], interceptTopicGet);
+				router.get('/api' + customTopicRoute, [], interceptTopicGet);
+
 
 				router.get('/plinker-reset-template-cache', function(req, res) {
 					winston.info("Attempting to reset template cache");
@@ -67,7 +101,6 @@
 
 			pluginActivate: function (id) {
 				winston.info("PLINKER - Plugin activated: " + id);
-				console.log("PLINKER - just get out!");
 			},
 
 			filterParsePost: function(input) {
@@ -84,9 +117,38 @@
 					callback();
 				}
 				return input;
+			},
+
+			cacheWidgetTemplate: function(templatePath, templateContents) {
+				cachedWidgetTemplates[templatePath] = templateContents;
+			},
+
+			defineWidgets: function(widgets, callback) {
+				loadWidgetTemplate('./templates/nodebb-plugin-plinker/admin/singlepost.tpl', function(templateData) {
+					widgets = widgets.concat([
+						{
+							widget: "singlepost",
+							name: "Single Post Widget",
+							description: "Renders the content of a single post",
+							content: templateData
+						}
+					]);
+
+					callback(null, widgets);
+				});
+			},
+
+			renderSinglePostWidget: function(widget, callback) {
+        winston.info("widget input: " + JSON.stringify(widget));
+
+				winston.info("postid: " +  widget.data.postId);
+
+        //'nodebb-plugin-plinker/widgets/singlepost'
+				app.render("nodebb-plugin-plinker/widgets/singleposttest", {postid: widget.data.postId }, callback);
+
 			}
 
-		}
+		};
 
 		module.exports = Plinker;
 
